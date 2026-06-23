@@ -1,0 +1,25 @@
+# Maven / Java
+/target/
+/.m2/
+.classpath
+.project
+.settings/
+/*.iml
+
+# IDEs
+.idea/
+.vscode/
+
+# Local JDKs and caches
+.jdks/
+.gradle/
+
+# Node
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+.log
