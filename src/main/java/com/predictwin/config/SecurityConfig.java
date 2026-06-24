@@ -42,13 +42,15 @@ public class SecurityConfig {
                         .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/matches/**",
+                                "/api/predictions/**",
+                                "/api/mob-auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/index.html",
                                 "/v3/api-docs/**",
                                 "/webjars/**")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/matches/**").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable());

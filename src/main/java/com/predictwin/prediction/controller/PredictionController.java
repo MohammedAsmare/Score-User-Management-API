@@ -28,10 +28,12 @@ public class PredictionController {
         this.predictionRepository = predictionRepository;
     }
 
-    @Operation(summary = "Create a prediction for the authenticated user")
+    @Operation(summary = "Create a prediction")
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody PredictionRequest req, Authentication auth) {
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName()))
+                ? Long.parseLong(auth.getName())
+                : null;
         log.info("Create prediction request received userId={} matchId={} homeScore={} awayScore={}", userId,
                 req.getMatchId(), req.getHomeScore(), req.getAwayScore());
         Prediction p = new Prediction();
@@ -61,7 +63,9 @@ public class PredictionController {
     @Operation(summary = "Get predictions for authenticated user")
     @GetMapping("/me")
     public ResponseEntity<?> myPredictions(Authentication auth) {
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName()))
+                ? Long.parseLong(auth.getName())
+                : null;
         log.debug("List predictions request received userId={}", userId);
         List<Prediction> list = predictionRepository.findByUserId(userId);
         log.info("Listed predictions userId={} count={}", userId, list.size());
@@ -77,7 +81,9 @@ public class PredictionController {
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody PredictionRequest req,
             Authentication auth) {
-        Long userId = Long.parseLong(auth.getName());
+        Long userId = (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName()))
+                ? Long.parseLong(auth.getName())
+                : null;
         log.info("Update prediction request received predictionId={} userId={} homeScore={} awayScore={}", id, userId,
                 req.getHomeScore(), req.getAwayScore());
         return predictionRepository.findById(id).map(p -> {
