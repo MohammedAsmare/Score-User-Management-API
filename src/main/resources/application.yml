@@ -22,7 +22,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.predictwin: DEBUG
+    com.soccerusermanagement: DEBUG
     org.springframework.security: INFO
 
 server:
