@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/token/**",
                                 "/api/matches/**",
                                 "/api/predictions/**",
                                 "/api/mob-auth/**",
@@ -62,7 +63,9 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/actuator/**");
+        return (web) -> web.ignoring().requestMatchers(
+                "/actuator/**",
+                "/api/token/**");
     }
 
     @Bean

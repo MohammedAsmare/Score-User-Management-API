@@ -38,6 +38,10 @@ public class JwtUtil {
                 .compact();
     }
 
+    public long getExpirationMs() {
+        return expirationMs;
+    }
+
     public io.jsonwebtoken.Claims parseClaims(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
