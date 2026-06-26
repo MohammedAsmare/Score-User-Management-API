@@ -92,7 +92,14 @@ public class MatchController {
             });
         }).orElseGet(() -> {
             log.warn("Update match failed because id={} was not found", id);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(new java.util.HashMap<>() {
+                {
+                    put("code", 404);
+                    put("success", false);
+                    put("message", "Match not found");
+                    put("data", null);
+                }
+            });
         });
     }
 }

@@ -25,8 +25,22 @@ public class TokenValidateController {
     @Operation(summary = "Validate a JWT token")
     @GetMapping("/validate")
     public ResponseEntity<TokenValidationResponse> validateToken(
-            @Parameter(description = "JWT token to validate", required = true) @RequestParam(value = "token", required = true) String token) {
+            @Parameter(description = "JWT token to validate") @RequestParam(value = "token", required = false) String tokenParam,
+            @Parameter(description = "Authorization header") @RequestHeader(value = "Authorization", required = false) String authHeader) {
         log.info("GET /api/token/validate - request received");
+
+        // Try to get token from request param first, then from Authorization header
+        String token = tokenParam;
+        if (token == null || token.trim().isEmpty()) {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
+
+        if (token == null || token.trim().isEmpty()) {
+            log.warn("Token validation failed: token is missing");
+            return ResponseEntity.ok(new TokenValidationResponse(400, false, "Token is missing"));
+        }
 
         TokenValidationResponse response = tokenService.validateToken(token);
         if (response.isSuccess()) {

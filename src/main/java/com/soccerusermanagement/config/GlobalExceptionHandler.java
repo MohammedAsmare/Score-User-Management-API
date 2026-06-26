@@ -10,62 +10,79 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+        private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
-        Map<String, String> fieldErrors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors()
-                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex,
+                        HttpServletRequest request) {
+                Map<String, String> fieldErrors = new HashMap<>();
+                ex.getBindingResult().getFieldErrors()
+                                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
 
-        log.warn("Validation failed method={} uri={} errors={}", request.getMethod(), request.getRequestURI(),
-                fieldErrors);
+                log.warn("Validation failed method={} uri={} errors={}", request.getMethod(), request.getRequestURI(),
+                                fieldErrors);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("success", false);
-        body.put("message", "Validation failed");
-        body.put("errors", fieldErrors);
-        return ResponseEntity.badRequest().body(body);
-    }
+                Map<String, Object> body = new HashMap<>();
+                body.put("success", false);
+                body.put("message", "Validation failed");
+                body.put("errors", fieldErrors);
+                return ResponseEntity.badRequest().body(body);
+        }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleUnreadableBody(HttpMessageNotReadableException ex,
-            HttpServletRequest request) {
-        log.warn("Invalid request body method={} uri={} reason={}", request.getMethod(), request.getRequestURI(),
-                ex.getMostSpecificCause().getMessage());
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        public ResponseEntity<Map<String, Object>> handleUnreadableBody(HttpMessageNotReadableException ex,
+                        HttpServletRequest request) {
+                log.warn("Invalid request body method={} uri={} reason={}", request.getMethod(),
+                                request.getRequestURI(),
+                                ex.getMostSpecificCause().getMessage());
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("success", false);
-        body.put("message", "Invalid request body");
-        return ResponseEntity.badRequest().body(body);
-    }
+                Map<String, Object> body = new HashMap<>();
+                body.put("success", false);
+                body.put("message", "Invalid request body");
+                return ResponseEntity.badRequest().body(body);
+        }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex,
-            HttpServletRequest request) {
-        log.warn("Database constraint violation method={} uri={} reason={}", request.getMethod(),
-                request.getRequestURI(), ex.getMostSpecificCause().getMessage());
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex,
+                        HttpServletRequest request) {
+                log.warn("Database constraint violation method={} uri={} reason={}", request.getMethod(),
+                                request.getRequestURI(), ex.getMostSpecificCause().getMessage());
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("success", false);
-        body.put("message", "Request conflicts with existing data");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
-    }
+                Map<String, Object> body = new HashMap<>();
+                body.put("success", false);
+                body.put("message", "Request conflicts with existing data");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+        }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleUnexpected(Exception ex, HttpServletRequest request) {
-        log.error("Unexpected error method={} uri={}", request.getMethod(), request.getRequestURI(), ex);
+        @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+        public ResponseEntity<Map<String, Object>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+                        HttpServletRequest request) {
+                log.warn("Method not supported method={} uri={} reason={}", request.getMethod(),
+                                request.getRequestURI(),
+                                ex.getMessage());
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("success", false);
-        body.put("message", "Internal server error");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-    }
+                Map<String, Object> body = new HashMap<>();
+                body.put("code", 555);
+                body.put("success", false);
+                body.put("message", "Invalid request method");
+                return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(body);
+        }
+
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<Map<String, Object>> handleUnexpected(Exception ex, HttpServletRequest request) {
+                log.error("Unexpected error method={} uri={}", request.getMethod(), request.getRequestURI(), ex);
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("code", 555);
+                body.put("success", false);
+                body.put("message", "Token is invalid");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+        }
 }
